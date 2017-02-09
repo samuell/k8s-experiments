@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"k8s.io/client-go/kubernetes"
+	//"k8s.io/client-go/kubernetes/typed/batch/v2alpha1"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -29,7 +30,9 @@ func main() {
 		for i, pod := range pods.Items {
 			fmt.Printf("Pod %d: %s\n", i, pod.Name)
 		}
-		time.Sleep(10 * time.Second)
+		nss := clientset.Core().Namespaces()
+		fmt.Printf("NS: %s\n", nss)
+		time.Sleep(2 * time.Second)
 	}
 }
 
