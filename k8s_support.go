@@ -26,6 +26,9 @@ func main() {
 		pods, err := clientset.Core().Pods("").List(v1.ListOptions{})
 		check(err)
 		fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
+		for i, pod := range pods.Items {
+			fmt.Printf("Pod %d: %s\n", i, pod.Name)
+		}
 		time.Sleep(10 * time.Second)
 	}
 }
