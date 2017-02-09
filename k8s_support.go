@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/kubernetes/pkg/api"
 	//"k8s.io/client-go/kubernetes/typed/batch/v2alpha1"
 	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/tools/clientcmd"
@@ -34,6 +35,7 @@ func main() {
 		fmt.Printf("NS: %s\n", nss)
 		time.Sleep(2 * time.Second)
 	}
+	fmt.Println(clientset.Jobs(api.NamespaceDefault))
 }
 
 func check(err error) {
