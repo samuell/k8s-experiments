@@ -14,15 +14,14 @@ var (
 
 func main() {
 	flag.Parse()
-
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	check(err)
-
 	clientset, err := kubernetes.NewForConfig(config)
 	check(err)
-
-	fmt.Println(clientset.BatchV1Client.Jobs("default").List(v1.ListOptions{}))
-
+	jobsList, err := clientset.BatchV1Client.Jobs("default").List(v1.ListOptions{})
+	for i, job := range jobsList.Items {
+		fmt.Printf("Job %d: %s\n", i, job.Name)
+	}
 }
 
 func check(err error) {
