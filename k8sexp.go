@@ -36,7 +36,41 @@ func main() {
 	for i, job := range jobsList.Items {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
-
+	// From https://github.com/pachyderm/pachyderm/blob/805e63e561a9eab4a9c52216f228f0f421714f3b/src/server/pps/server/api_server.go#L2320-L2345
+	//
+	// import (
+	//		"k8s.io/kubernetes/pkg/api"
+	//		"k8s.io/kubernetes/pkg/api/unversioned"
+	//		"k8s.io/kubernetes/pkg/apis/batch"
+	//		kube "k8s.io/kubernetes/pkg/client/unversioned"
+	//		kube_labels "k8s.io/kubernetes/pkg/labels"
+	// )
+	//
+	// jobStructure := &batch.Job{
+	// 	TypeMeta: unversioned.TypeMeta{
+	// 		Kind:       "Job",
+	// 		APIVersion: "v1",
+	// 	},
+	// 	ObjectMeta: api.ObjectMeta{
+	// 		Name:   jobInfo.JobID,
+	// 		Labels: options.labels,
+	// 	},
+	// 	Spec: batch.JobSpec{
+	// 		ManualSelector: &trueVal,
+	// 		Selector: &unversioned.LabelSelector{
+	// 			MatchLabels: options.labels,
+	// 		},
+	// 		Parallelism: &options.parallelism,
+	// 		Completions: &options.parallelism,
+	// 		Template: api.PodTemplateSpec{
+	// 			ObjectMeta: api.ObjectMeta{
+	// 				Name:   jobInfo.JobID,
+	// 				Labels: options.labels,
+	// 			},
+	// 			Spec: podSpec(options, jobInfo.JobID, "Never"),
+	// 		},
+	// 	},
+	// }
 	newJob, err := jobsClient.Create(&batchv1.Job{
 		Spec: batchv1.JobSpec{},
 	})
