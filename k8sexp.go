@@ -22,7 +22,13 @@ func main() {
 
 	// Access jobs. We can't do it all in one line, since we need to receive the
 	// errors and manage thgem appropriately
-	jobsList, err := clientset.BatchV1Client.Jobs("default").List(v1.ListOptions{})
+	batchClient := clientset.BatchV1Client
+	jobsClient := batchClient.Jobs("default")
+	piJob, err := jobsClient.Get("pi")
+	check(err)
+	fmt.Printf("piJob Name: %v\n", piJob.Name)
+
+	jobsList, err := jobsClient.List(v1.ListOptions{})
 	check(err)
 
 	// Loop over all jobs and print their name
