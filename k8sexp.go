@@ -71,6 +71,38 @@ func main() {
 	// 		},
 	// 	},
 	// }
+	//
+	// func podSpec(options *jobOptions, jobID string, restartPolicy api.RestartPolicy) api.PodSpec {
+	// 	return api.PodSpec{
+	// 		InitContainers: []api.Container{
+	// 			{
+	// 				Name:            "init",
+	// 				Image:           options.jobShimImage,
+	// 				Command:         []string{"/pach/job-shim.sh"},
+	// 				ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
+	// 				Env:             options.jobEnv,
+	// 				VolumeMounts:    options.volumeMounts,
+	// 			},
+	// 		},
+	// 		Containers: []api.Container{
+	// 			{
+	// 				Name:    "user",
+	// 				Image:   options.userImage,
+	// 				Command: []string{"/pach-bin/guest.sh", jobID},
+	// 				SecurityContext: &api.SecurityContext{
+	// 					Privileged: &trueVal, // god is this dumb
+	// 				},
+	// 				ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
+	// 				Env:             options.jobEnv,
+	// 				VolumeMounts:    options.volumeMounts,
+	// 			},
+	// 		},
+	// 		RestartPolicy:    restartPolicy,
+	// 		Volumes:          options.volumes,
+	// 		ImagePullSecrets: options.imagePullSecrets,
+	// 	}
+	// }
+
 	newJob, err := jobsClient.Create(&batchv1.Job{
 		Spec: batchv1.JobSpec{},
 	})
