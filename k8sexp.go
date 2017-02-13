@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -20,8 +21,7 @@ func main() {
 	clientset, err := kubernetes.NewForConfig(config)
 	check(err)
 
-	jobs := clientset.BatchV1Client.Jobs("default")
-	fmt.Printf("Jobs: %v\n", jobs)
+	fmt.Println(clientset.BatchV1Client.Jobs("default").List(v1.ListOptions{}))
 
 }
 
