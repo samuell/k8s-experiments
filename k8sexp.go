@@ -6,6 +6,7 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/v1"
+	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -35,6 +36,13 @@ func main() {
 	for i, job := range jobsList.Items {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
+
+	newJob, err := jobsClient.Create(&batchv1.Job{
+		Spec: batchv1.JobSpec{},
+	})
+	check(err)
+
+	fmt.Println("New job name: ", newJob.Name)
 }
 
 func check(err error) {
