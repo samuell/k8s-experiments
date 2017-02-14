@@ -110,9 +110,9 @@ func main() {
 			Kind:       "Job",
 			APIVersion: "v1",
 		},
-		ObjectMeta: api.ObjectMeta{
-			Name:   jobInfo.JobID, // TODO: What is jobInfo?
-			Labels: options.labels,
+		ObjectMeta: v1.ObjectMeta{
+			Name:   "k8sexp-testjob",
+			Labels: make(map[string]string),
 		},
 		Spec: batchv1.JobSpec{
 			// Optional: Parallelism:,
