@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/pkg/api"
+	"k8s.io/client-go/pkg/api/unversioned"
 	"k8s.io/client-go/pkg/api/v1"
 	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
@@ -103,9 +105,60 @@ func main() {
 	// 	}
 	// }
 
-	newJob, err := jobsClient.Create(&batchv1.Job{
-		Spec: batchv1.JobSpec{},
-	})
+	batchJob := &batchv1.Job{
+		TypeMeta: unversioned.TypeMeta{
+			Kind:       "Job",
+			APIVersion: "v1",
+		},
+		ObjectMeta: api.ObjectMeta{
+			Name:   jobInfo.JobID, // TODO: What is jobInfo?
+			Labels: options.labels,
+		},
+		Spec: batchv1.JobSpec{
+			// Optional: Parallelism:,
+			// Optional: Completions:,
+			// Optional: ActiveDeadlineSeconds:,
+			// Optional: Selector:,
+			// Optional: ManualSelector:,
+			Template: api.PodTemplateSpec{
+				ObjectMeta: api.ObjectMeta{
+					Name:   jobInfo.JobID,
+					Labels: options.labels,
+				},
+				Spec: api.PodSpec{
+					InitContainers: []api.Container{
+						{
+							Name:            "init",
+							Image:           options.jobShimImage,
+							Command:         []string{"/pach/job-shim.sh"},
+							ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
+							Env:             options.jobEnv,
+							VolumeMounts:    options.volumeMounts,
+						},
+					},
+					Containers: []api.Container{
+						{
+							Name:    "user",
+							Image:   options.userImage,
+							Command: []string{"/pach-bin/guest.sh", jobID},
+							SecurityContext: &api.SecurityContext{
+								Privileged: &trueVal, // god is this dumb
+							},
+							ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
+							Env:             options.jobEnv,
+							VolumeMounts:    options.volumeMounts,
+						},
+					},
+					RestartPolicy:    restartPolicy,
+					Volumes:          options.volumes,
+					ImagePullSecrets: options.imagePullSecrets,
+				},
+			},
+		},
+		// Optional, not used by pachy: JobStatus:,
+	}
+
+	newJob, err := jobsClient.Create(batchJob)
 	check(err)
 
 	fmt.Println("New job name: ", newJob.Name)
