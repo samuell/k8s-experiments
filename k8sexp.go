@@ -130,8 +130,8 @@ func main() {
 					InitContainers: []k8s_api.Container{}, // Doesn't seem obligatory(?)...
 					Containers: []k8s_api.Container{
 						{
-							Name:    "user",
-							Image:   "ubuntu:ubuntu",
+							Name:    "k8sexp-testimg",
+							Image:   "perl",
 							Command: []string{"sleep", "10"},
 							SecurityContext: &k8s_api.SecurityContext{
 								Privileged: &falseVal,
