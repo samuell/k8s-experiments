@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/unversioned"
+	k8sapiUnver "k8s.io/client-go/pkg/api/unversioned"
 	k8sapi "k8s.io/client-go/pkg/api/v1"
 	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
@@ -41,9 +41,9 @@ func main() {
 	}
 
 	// For an example of how to create jobs, see this file:
-	// https://github.com/pachyderm/pachyderm/blob/805e63e561a9eab4a9c52216f228f0f421714f3b/src/server/pps/server/api_server.go#L2320-L2345
+	// https://github.com/pachyderm/pachyderm/blob/805e63/src/server/pps/server/api_server.go#L2320-L2345
 	batchJob := &batchv1.Job{
-		TypeMeta: unversioned.TypeMeta{
+		TypeMeta: k8sapiUnver.TypeMeta{
 			Kind:       "Job",
 			APIVersion: "v1",
 		},
