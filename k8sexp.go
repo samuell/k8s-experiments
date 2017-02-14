@@ -6,7 +6,7 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/pkg/api/unversioned"
-	k8s_api "k8s.io/client-go/pkg/api/v1"
+	k8sapi "k8s.io/client-go/pkg/api/v1"
 	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -32,7 +32,7 @@ func main() {
 	check(err)
 	fmt.Printf("piJob Name: %v\n", piJob.Name)
 
-	jobsList, err := jobsClient.List(k8s_api.ListOptions{})
+	jobsList, err := jobsClient.List(k8sapi.ListOptions{})
 	check(err)
 
 	// Loop over all jobs and print their name
@@ -111,7 +111,7 @@ func main() {
 			Kind:       "Job",
 			APIVersion: "v1",
 		},
-		ObjectMeta: k8s_api.ObjectMeta{
+		ObjectMeta: k8sapi.ObjectMeta{
 			Name:   "k8sexp-testjob",
 			Labels: make(map[string]string),
 		},
@@ -121,29 +121,29 @@ func main() {
 			// Optional: ActiveDeadlineSeconds:,
 			// Optional: Selector:,
 			// Optional: ManualSelector:,
-			Template: k8s_api.PodTemplateSpec{
-				ObjectMeta: k8s_api.ObjectMeta{
+			Template: k8sapi.PodTemplateSpec{
+				ObjectMeta: k8sapi.ObjectMeta{
 					Name:   "k8sexp-testpod",
 					Labels: make(map[string]string),
 				},
-				Spec: k8s_api.PodSpec{
-					InitContainers: []k8s_api.Container{}, // Doesn't seem obligatory(?)...
-					Containers: []k8s_api.Container{
+				Spec: k8sapi.PodSpec{
+					InitContainers: []k8sapi.Container{}, // Doesn't seem obligatory(?)...
+					Containers: []k8sapi.Container{
 						{
 							Name:    "k8sexp-testimg",
 							Image:   "perl",
 							Command: []string{"sleep", "10"},
-							SecurityContext: &k8s_api.SecurityContext{
+							SecurityContext: &k8sapi.SecurityContext{
 								Privileged: &falseVal,
 							},
-							ImagePullPolicy: k8s_api.PullPolicy(k8s_api.PullIfNotPresent),
-							Env:             []k8s_api.EnvVar{},
-							VolumeMounts:    []k8s_api.VolumeMount{},
+							ImagePullPolicy: k8sapi.PullPolicy(k8sapi.PullIfNotPresent),
+							Env:             []k8sapi.EnvVar{},
+							VolumeMounts:    []k8sapi.VolumeMount{},
 						},
 					},
-					RestartPolicy:    k8s_api.RestartPolicyOnFailure,
-					Volumes:          []k8s_api.Volume{},
-					ImagePullSecrets: []k8s_api.LocalObjectReference{},
+					RestartPolicy:    k8sapi.RestartPolicyOnFailure,
+					Volumes:          []k8sapi.Volume{},
+					ImagePullSecrets: []k8sapi.LocalObjectReference{},
 				},
 			},
 		},
