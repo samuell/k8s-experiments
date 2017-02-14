@@ -39,73 +39,9 @@ func main() {
 	for i, job := range jobsList.Items {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
-	// From https://github.com/pachyderm/pachyderm/blob/805e63e561a9eab4a9c52216f228f0f421714f3b/src/server/pps/server/api_server.go#L2320-L2345
-	//
-	// import (
-	//		"k8s.io/kubernetes/pkg/api"
-	//		"k8s.io/kubernetes/pkg/api/unversioned"
-	//		"k8s.io/kubernetes/pkg/apis/batch"
-	//		kube "k8s.io/kubernetes/pkg/client/unversioned"
-	//		kube_labels "k8s.io/kubernetes/pkg/labels"
-	// )
-	//
-	// jobStructure := &batch.Job{
-	// 	TypeMeta: unversioned.TypeMeta{
-	// 		Kind:       "Job",
-	// 		APIVersion: "v1",
-	// 	},
-	// 	ObjectMeta: api.ObjectMeta{
-	// 		Name:   jobInfo.JobID,
-	// 		Labels: options.labels,
-	// 	},
-	// 	Spec: batch.JobSpec{
-	// 		ManualSelector: &trueVal,
-	// 		Selector: &unversioned.LabelSelector{
-	// 			MatchLabels: options.labels,
-	// 		},
-	// 		Parallelism: &options.parallelism,
-	// 		Completions: &options.parallelism,
-	// 		Template: api.PodTemplateSpec{
-	// 			ObjectMeta: api.ObjectMeta{
-	// 				Name:   jobInfo.JobID,
-	// 				Labels: options.labels,
-	// 			},
-	// 			Spec: podSpec(options, jobInfo.JobID, "Never"),
-	// 		},
-	// 	},
-	// }
-	//
-	// func podSpec(options *jobOptions, jobID string, restartPolicy api.RestartPolicy) api.PodSpec {
-	// 	return api.PodSpec{
-	// 		InitContainers: []api.Container{
-	// 			{
-	// 				Name:            "init",
-	// 				Image:           options.jobShimImage,
-	// 				Command:         []string{"/pach/job-shim.sh"},
-	// 				ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
-	// 				Env:             options.jobEnv,
-	// 				VolumeMounts:    options.volumeMounts,
-	// 			},
-	// 		},
-	// 		Containers: []api.Container{
-	// 			{
-	// 				Name:    "user",
-	// 				Image:   options.userImage,
-	// 				Command: []string{"/pach-bin/guest.sh", jobID},
-	// 				SecurityContext: &api.SecurityContext{
-	// 					Privileged: &trueVal, // god is this dumb
-	// 				},
-	// 				ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
-	// 				Env:             options.jobEnv,
-	// 				VolumeMounts:    options.volumeMounts,
-	// 			},
-	// 		},
-	// 		RestartPolicy:    restartPolicy,
-	// 		Volumes:          options.volumes,
-	// 		ImagePullSecrets: options.imagePullSecrets,
-	// 	}
-	// }
 
+	// For an example of how to create jobs, see this file:
+	// https://github.com/pachyderm/pachyderm/blob/805e63e561a9eab4a9c52216f228f0f421714f3b/src/server/pps/server/api_server.go#L2320-L2345
 	batchJob := &batchv1.Job{
 		TypeMeta: unversioned.TypeMeta{
 			Kind:       "Job",
