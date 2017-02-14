@@ -5,15 +5,16 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api"
 	"k8s.io/client-go/pkg/api/unversioned"
-	"k8s.io/client-go/pkg/api/v1"
+	k8s_api "k8s.io/client-go/pkg/api/v1"
 	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
 	kubeconfig = flag.String("kubeconfig", "/home/samuel/.kube/config", "absolute path to the kubeconfig file")
+	trueVal    = true
+	falseVal   = false
 )
 
 func main() {
@@ -31,7 +32,7 @@ func main() {
 	check(err)
 	fmt.Printf("piJob Name: %v\n", piJob.Name)
 
-	jobsList, err := jobsClient.List(v1.ListOptions{})
+	jobsList, err := jobsClient.List(k8s_api.ListOptions{})
 	check(err)
 
 	// Loop over all jobs and print their name
@@ -110,7 +111,7 @@ func main() {
 			Kind:       "Job",
 			APIVersion: "v1",
 		},
-		ObjectMeta: v1.ObjectMeta{
+		ObjectMeta: k8s_api.ObjectMeta{
 			Name:   "k8sexp-testjob",
 			Labels: make(map[string]string),
 		},
@@ -120,42 +121,33 @@ func main() {
 			// Optional: ActiveDeadlineSeconds:,
 			// Optional: Selector:,
 			// Optional: ManualSelector:,
-			Template: api.PodTemplateSpec{
-				ObjectMeta: api.ObjectMeta{
-					Name:   jobInfo.JobID,
-					Labels: options.labels,
+			Template: k8s_api.PodTemplateSpec{
+				ObjectMeta: k8s_api.ObjectMeta{
+					Name:   "k8sexp-testpod",
+					Labels: make(map[string]string),
 				},
-				Spec: api.PodSpec{
-					InitContainers: []api.Container{
-						{
-							Name:            "init",
-							Image:           options.jobShimImage,
-							Command:         []string{"/pach/job-shim.sh"},
-							ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
-							Env:             options.jobEnv,
-							VolumeMounts:    options.volumeMounts,
-						},
-					},
-					Containers: []api.Container{
+				Spec: k8s_api.PodSpec{
+					InitContainers: []k8s_api.Container{}, // Doesn't seem obligatory(?)...
+					Containers: []k8s_api.Container{
 						{
 							Name:    "user",
-							Image:   options.userImage,
-							Command: []string{"/pach-bin/guest.sh", jobID},
-							SecurityContext: &api.SecurityContext{
-								Privileged: &trueVal, // god is this dumb
+							Image:   "ubuntu:ubuntu",
+							Command: []string{"sleep", "10"},
+							SecurityContext: &k8s_api.SecurityContext{
+								Privileged: &falseVal,
 							},
-							ImagePullPolicy: api.PullPolicy(options.jobImagePullPolicy),
-							Env:             options.jobEnv,
-							VolumeMounts:    options.volumeMounts,
+							ImagePullPolicy: k8s_api.PullPolicy(k8s_api.PullIfNotPresent),
+							Env:             []k8s_api.EnvVar{},
+							VolumeMounts:    []k8s_api.VolumeMount{},
 						},
 					},
-					RestartPolicy:    restartPolicy,
-					Volumes:          options.volumes,
-					ImagePullSecrets: options.imagePullSecrets,
+					RestartPolicy:    k8s_api.RestartPolicyOnFailure,
+					Volumes:          []k8s_api.Volume{},
+					ImagePullSecrets: []k8s_api.LocalObjectReference{},
 				},
 			},
 		},
-		// Optional, not used by pachy: JobStatus:,
+		// Optional, not used by pach: JobStatus:,
 	}
 
 	newJob, err := jobsClient.Create(batchJob)
