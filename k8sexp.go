@@ -90,7 +90,7 @@ func main() {
 						{
 							Name:    "k8sexp-testimg",
 							Image:   "perl",
-							Command: []string{"bash", "-c", "echo hej > /k8exp-data/hej.txt"},
+							Command: []string{"sh", "-c", "echo hej > /k8sexp-data/hej.txt"},
 							SecurityContext: &api.SecurityContext{
 								Privileged: &falseVal,
 							},
