@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/pkg/api/resource"
 	apiUnver "k8s.io/client-go/pkg/api/unversioned"
 	api "k8s.io/client-go/pkg/api/v1"
 	batchapi "k8s.io/client-go/pkg/apis/batch/v1"
@@ -41,27 +40,27 @@ func main() {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
 
-	storageQuantity1Gi, err := resource.ParseQuantity("1Gi")
-	check(err)
+	//storageQuantity1Gi, err := resource.ParseQuantity("1Gi")
+	//check(err)
 
-	k8sexpVolume := &api.PersistentVolume{
-		ObjectMeta: api.ObjectMeta{
-			Name: "k8sexp-volume",
-		},
-		Spec: api.PersistentVolumeSpec{
-			Capacity: api.ResourceList{
-				api.ResourceStorage: storageQuantity1Gi,
-			},
-			AccessModes: []api.PersistentVolumeAccessMode{
-				api.PersistentVolumeAccessMode("ReadWriteMany"),
-			},
-			PersistentVolumeReclaimPolicy: api.PersistentVolumeReclaimRecycle,
-		},
-	}
-
-	k8sexpVolumeClaim := &api.PersistentVolumeClaim{}
-
-	fmt.Printf("Volume: %v\n\nVolumeClaim: %v\n", k8sexpVolume, k8sexpVolumeClaim)
+	//	k8sexpVolume := &api.PersistentVolume{
+	//		ObjectMeta: api.ObjectMeta{
+	//			Name: "k8sexp-volume",
+	//		},
+	//		Spec: api.PersistentVolumeSpec{
+	//			Capacity: api.ResourceList{
+	//				api.ResourceStorage: storageQuantity1Gi,
+	//			},
+	//			AccessModes: []api.PersistentVolumeAccessMode{
+	//				api.PersistentVolumeAccessMode("ReadWriteMany"),
+	//			},
+	//			PersistentVolumeReclaimPolicy: api.PersistentVolumeReclaimRecycle,
+	//		},
+	//	}
+	//
+	//	k8sexpVolumeClaim := &api.PersistentVolumeClaim{}
+	//
+	//	fmt.Printf("Volume: %v\n\nVolumeClaim: %v\n", k8sexpVolume, k8sexpVolumeClaim)
 
 	// For an example of how to create jobs, see this file:
 	// https://github.com/pachyderm/pachyderm/blob/805e63/src/server/pps/server/api_server.go#L2320-L2345
@@ -91,7 +90,7 @@ func main() {
 						{
 							Name:    "k8sexp-testimg",
 							Image:   "perl",
-							Command: []string{"sleep", "10"},
+							Command: []string{"bash", "-c", "echo hej > /k8exp-data/hej.txt"},
 							SecurityContext: &api.SecurityContext{
 								Privileged: &falseVal,
 							},
@@ -110,6 +109,11 @@ func main() {
 					Volumes: []api.Volume{
 						api.Volume{
 							Name: "k8sexp-testvol",
+							VolumeSource: api.VolumeSource{
+								HostPath: &api.HostPathVolumeSource{
+									Path: "/data",
+								},
+							},
 						},
 					},
 				},
