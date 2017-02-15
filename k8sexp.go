@@ -5,9 +5,10 @@ import (
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
-	k8sapiUnver "k8s.io/client-go/pkg/api/unversioned"
-	k8sapi "k8s.io/client-go/pkg/api/v1"
-	batchv1 "k8s.io/client-go/pkg/apis/batch/v1"
+	"k8s.io/client-go/pkg/api/resource"
+	apiUnver "k8s.io/client-go/pkg/api/unversioned"
+	api "k8s.io/client-go/pkg/api/v1"
+	batchapi "k8s.io/client-go/pkg/apis/batch/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -32,7 +33,7 @@ func main() {
 	check(err)
 	fmt.Printf("piJob Name: %v\n", piJob.Name)
 
-	jobsList, err := jobsClient.List(k8sapi.ListOptions{})
+	jobsList, err := jobsClient.List(api.ListOptions{})
 	check(err)
 
 	// Loop over all jobs and print their name
@@ -40,51 +41,92 @@ func main() {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
 
+	storageQuantity1Gi, err := resource.ParseQuantity("1Gi")
+	check(err)
+
+	k8sexpVolume := &api.PersistentVolume{
+		ObjectMeta: api.ObjectMeta{
+			Name: "k8sexp-volume",
+		},
+		Spec: api.PersistentVolumeSpec{
+			Capacity: api.ResourceList{
+				api.ResourceStorage: storageQuantity1Gi,
+			},
+			AccessModes: []api.PersistentVolumeAccessMode{
+				api.PersistentVolumeAccessMode("ReadWriteMany"),
+			},
+			PersistentVolumeReclaimPolicy: api.PersistentVolumeReclaimRecycle,
+		},
+	}
+
+	k8sexpVolumeClaim := &api.PersistentVolumeClaim{}
+
+	fmt.Printf("Volume: %v\n\nVolumeClaim: %v\n", k8sexpVolume, k8sexpVolumeClaim)
+
 	// For an example of how to create jobs, see this file:
 	// https://github.com/pachyderm/pachyderm/blob/805e63/src/server/pps/server/api_server.go#L2320-L2345
-	batchJob := &batchv1.Job{
-		TypeMeta: k8sapiUnver.TypeMeta{
+	batchJob := &batchapi.Job{
+		TypeMeta: apiUnver.TypeMeta{
 			Kind:       "Job",
 			APIVersion: "v1",
 		},
-		ObjectMeta: k8sapi.ObjectMeta{
+		ObjectMeta: api.ObjectMeta{
 			Name:   "k8sexp-testjob",
 			Labels: make(map[string]string),
 		},
-		Spec: batchv1.JobSpec{
+		Spec: batchapi.JobSpec{
 			// Optional: Parallelism:,
 			// Optional: Completions:,
 			// Optional: ActiveDeadlineSeconds:,
 			// Optional: Selector:,
 			// Optional: ManualSelector:,
-			Template: k8sapi.PodTemplateSpec{
-				ObjectMeta: k8sapi.ObjectMeta{
+			Template: api.PodTemplateSpec{
+				ObjectMeta: api.ObjectMeta{
 					Name:   "k8sexp-testpod",
 					Labels: make(map[string]string),
 				},
-				Spec: k8sapi.PodSpec{
-					InitContainers: []k8sapi.Container{}, // Doesn't seem obligatory(?)...
-					Containers: []k8sapi.Container{
+				Spec: api.PodSpec{
+					InitContainers: []api.Container{}, // Doesn't seem obligatory(?)...
+					Containers: []api.Container{
 						{
 							Name:    "k8sexp-testimg",
 							Image:   "perl",
 							Command: []string{"sleep", "10"},
-							SecurityContext: &k8sapi.SecurityContext{
+							SecurityContext: &api.SecurityContext{
 								Privileged: &falseVal,
 							},
-							ImagePullPolicy: k8sapi.PullPolicy(k8sapi.PullIfNotPresent),
-							Env:             []k8sapi.EnvVar{},
-							VolumeMounts:    []k8sapi.VolumeMount{},
+							ImagePullPolicy: api.PullPolicy(api.PullIfNotPresent),
+							Env:             []api.EnvVar{},
+							VolumeMounts: []api.VolumeMount{
+								api.VolumeMount{
+									Name:      "k8sexp-testvol",
+									MountPath: "/k8sexp-data",
+								},
+							},
 						},
 					},
-					RestartPolicy:    k8sapi.RestartPolicyOnFailure,
-					Volumes:          []k8sapi.Volume{},
-					ImagePullSecrets: []k8sapi.LocalObjectReference{},
+					RestartPolicy:    api.RestartPolicyOnFailure,
+					ImagePullSecrets: []api.LocalObjectReference{},
+					Volumes: []api.Volume{
+						api.Volume{
+							Name: "k8sexp-testvol",
+						},
+					},
 				},
 			},
 		},
 		// Optional, not used by pach: JobStatus:,
 	}
+	//Volumes: []Volumes{
+	//	api.PersistentVolume{
+	//		ObjectMeta: api.ObjectMeta{
+	//			Name: "k8sexp-testvol",
+	//		},
+	//		Spec: api.PersistentVolumeSpec{
+	//			AccessModes: api.ReadWriteOnce,
+	//		},
+	//	},
+	//},
 
 	newJob, err := jobsClient.Create(batchJob)
 	check(err)
