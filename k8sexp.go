@@ -40,28 +40,6 @@ func main() {
 		fmt.Printf("Job %d: %s\n", i, job.Name)
 	}
 
-	//storageQuantity1Gi, err := resource.ParseQuantity("1Gi")
-	//check(err)
-
-	//	k8sexpVolume := &api.PersistentVolume{
-	//		ObjectMeta: api.ObjectMeta{
-	//			Name: "k8sexp-volume",
-	//		},
-	//		Spec: api.PersistentVolumeSpec{
-	//			Capacity: api.ResourceList{
-	//				api.ResourceStorage: storageQuantity1Gi,
-	//			},
-	//			AccessModes: []api.PersistentVolumeAccessMode{
-	//				api.PersistentVolumeAccessMode("ReadWriteMany"),
-	//			},
-	//			PersistentVolumeReclaimPolicy: api.PersistentVolumeReclaimRecycle,
-	//		},
-	//	}
-	//
-	//	k8sexpVolumeClaim := &api.PersistentVolumeClaim{}
-	//
-	//	fmt.Printf("Volume: %v\n\nVolumeClaim: %v\n", k8sexpVolume, k8sexpVolumeClaim)
-
 	// For an example of how to create jobs, see this file:
 	// https://github.com/pachyderm/pachyderm/blob/805e63/src/server/pps/server/api_server.go#L2320-L2345
 	batchJob := &batchapi.Job{
@@ -74,11 +52,6 @@ func main() {
 			Labels: make(map[string]string),
 		},
 		Spec: batchapi.JobSpec{
-			// Optional: Parallelism:,
-			// Optional: Completions:,
-			// Optional: ActiveDeadlineSeconds:,
-			// Optional: Selector:,
-			// Optional: ManualSelector:,
 			Template: api.PodTemplateSpec{
 				ObjectMeta: api.ObjectMeta{
 					Name:   "k8sexp-testpod",
@@ -119,18 +92,7 @@ func main() {
 				},
 			},
 		},
-		// Optional, not used by pach: JobStatus:,
 	}
-	//Volumes: []Volumes{
-	//	api.PersistentVolume{
-	//		ObjectMeta: api.ObjectMeta{
-	//			Name: "k8sexp-testvol",
-	//		},
-	//		Spec: api.PersistentVolumeSpec{
-	//			AccessModes: api.ReadWriteOnce,
-	//		},
-	//	},
-	//},
 
 	newJob, err := jobsClient.Create(batchJob)
 	check(err)
